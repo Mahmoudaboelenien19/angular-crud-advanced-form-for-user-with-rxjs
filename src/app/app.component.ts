@@ -7,7 +7,6 @@ import { UsersListComponent } from './components/users-list/users-list.component
   standalone: true,
   imports: [RouterOutlet, UsersListComponent],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.css',
 })
 export class AppComponent {
   title = 'angular-crud-user-with-rxjs';

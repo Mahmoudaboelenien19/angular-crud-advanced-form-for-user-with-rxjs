@@ -23,7 +23,6 @@ import { CommonModule } from '@angular/common';
     CommonModule,
   ],
   templateUrl: './user-card.component.html',
-  styleUrl: './user-card.component.css',
 })
 export class UserCardComponent {
   @Input() user!: User;
