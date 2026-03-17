@@ -1,0 +1,56 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "name": "Alice Johnson",
+      "age": 28,
+      "email": "alice.johnson@example.com",
+      "skills": ["JavaScript", "React", "Node.js", "CSS"],
+      "experience": [
+        { "title": "Frontend Developer", "years": 3 },
+        { "title": "UI Specialist", "years": 1 }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Bob Smith",
+      "age": 35,
+      "email": "bob.smith@example.com",
+      "skills": ["Python", "Django", "PostgreSQL", "Docker"],
+      "experience": [
+        { "title": "Backend Developer", "years": 5 },
+        { "title": "DevOps Engineer", "years": 2 }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Carol Davis",
+      "age": 42,
+      "email": "carol.davis@example.com",
+      "skills": ["Java", "Spring Boot", "AWS", "Kubernetes"],
+      "experience": [
+        { "title": "Software Architect", "years": 8 },
+        { "title": "Tech Lead", "years": 3 }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "David Wilson",
+      "age": 24,
+      "email": "david.wilson@example.com",
+      "skills": ["HTML", "CSS", "JavaScript", "Vue.js"],
+      "experience": [{ "title": "Junior Developer", "years": 1 }]
+    },
+    {
+      "id": 5,
+      "name": "Eva Brown",
+      "age": 31,
+      "email": "eva.brown@example.com",
+      "skills": ["Ruby", "Rails", "MySQL", "RSpec"],
+      "experience": [
+        { "title": "Full Stack Developer", "years": 4 },
+        { "title": "Product Manager", "years": 1 }
+      ]
+    }
+  ]
+}
