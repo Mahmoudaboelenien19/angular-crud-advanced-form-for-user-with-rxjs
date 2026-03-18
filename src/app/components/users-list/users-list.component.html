@@ -22,3 +22,17 @@
     }
   }
 }
+
+<ng-container *ngIf="state$ | async as state">
+  @if (state.total > 0) {
+    <mat-paginator
+      [length]="state.total"
+      [pageSize]="5"
+      [pageIndex]="state.page"
+      (page)="onChangePage($event.pageIndex)"
+      aria-label="Select page"
+      [hidePageSize]="false"
+    >
+    </mat-paginator>
+  }
+</ng-container>

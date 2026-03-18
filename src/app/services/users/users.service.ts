@@ -1,14 +1,16 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpResponse } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import {
   BehaviorSubject,
   concatMap,
+  distinctUntilChanged,
   map,
   merge,
   Observable,
   scan,
   startWith,
   Subject,
+  switchMap,
 } from 'rxjs';
 import { GlobalObservablesHandlerService } from '../globalObservablesHandler/global-observables-handler.service';
 import { User } from '../../models/user.model';
@@ -17,7 +19,11 @@ type EffectMap = {
   getAll: { users: User[] };
   search: { users: User[] };
 };
-
+type State = {
+  page: number;
+  total: number;
+  search: string;
+};
 type UsersEffect = {
   [K in keyof EffectMap]: { type: K } & EffectMap[K];
 }[keyof EffectMap];
@@ -35,11 +41,27 @@ export class UsersService {
   getLoading$ = this.getLoading.asObservable();
   searchLoading = new BehaviorSubject(false);
   searchLoading$ = this.searchLoading.asObservable();
-  page = new BehaviorSubject(0);
+  state$ = new BehaviorSubject<State>({
+    page: 0,
+    total: 0,
+    search: '',
+  });
   private search$ = new Subject<string>();
   users$: Observable<User[]> = merge(
-    this.getAllUsersWithHandler(),
-    this.search$.pipe(concatMap((name) => this.searchUsersWithHandler(name))),
+    this.state$.pipe(
+      // map((p) => p.page),
+      distinctUntilChanged(
+        (prev, curr) => prev.page === curr.page && prev.search === curr.search,
+      ),
+      switchMap((page) => {
+        if (!page.search) {
+          return this.getAllUsersWithHandler(page.page);
+        } else {
+          return this.searchUsersWithHandler(page.search, page.page);
+        }
+      }),
+    ),
+    // this.search$.pipe(concatMap((name) => this.searchUsersWithHandler(name))),
   ).pipe(
     scan((users, event) => {
       switch (event.type) {
@@ -53,28 +75,54 @@ export class UsersService {
     }, [] as User[]),
     startWith([]),
   );
-  getAllUsers() {
-    return this.http.get<User[]>('http://localhost:3000/users');
+  private changeState(key: keyof State, value: any) {
+    this.state$.next({ ...this.state$.value, [key]: value });
+  }
+  changePage(page: number) {
+    this.changeState('page', page);
+  }
+  getAllUsers(page: number): Observable<User[]> {
+    return this.http
+      .get<
+        User[]
+      >(`http://localhost:3000/users?_page=${page + 1}&_limit=${Page_Size}`, { observe: 'response' })
+      .pipe(
+        map((response: HttpResponse<User[]>) => {
+          const totalCount = Number(response.headers.get('X-Total-Count'));
+          this.changeState('total', totalCount);
+          return response.body as User[];
+        }),
+      );
   }
 
-  getAllUsersWithHandler(): Observable<UsersEffect> {
+  getAllUsersWithHandler(page: number): Observable<UsersEffect> {
     return this._ob_handler
-      .withLoadingAndError(this.getAllUsers(), this.getLoading)
+      .withLoadingAndError(this.getAllUsers(page), this.getLoading)
       .pipe(map((users) => ({ users, type: 'getAll' })));
   }
-
-  searchUsers(name: string) {
-    return this.http.get<User[]>(
-      'http://localhost:3000/users?name_like=' + name,
-    );
+  clearSearch() {
+    this.changeState('search', '');
   }
-
   searchAction(name: string) {
-    this.search$.next(name);
+    this.changeState('search', name);
+    // this.search$.next(name);
   }
-  searchUsersWithHandler(name: string): Observable<UsersEffect> {
+  private searchUsers(name: string, page: number): Observable<User[]> {
+    return this.http
+      .get<
+        User[]
+      >(`http://localhost:3000/users?name_like=${name}&_page=${page + 1}&_limit=${Page_Size}`, { observe: 'response' })
+      .pipe(
+        map((response: HttpResponse<User[]>) => {
+          const total = Number(response.headers.get('X-Total-Count'));
+          this.changeState('total', total);
+          return response.body as User[];
+        }),
+      );
+  }
+  searchUsersWithHandler(name: string, page: number): Observable<UsersEffect> {
     return this._ob_handler
-      .withLoadingAndError(this.searchUsers(name), this.searchLoading)
+      .withLoadingAndError(this.searchUsers(name, page), this.searchLoading)
       .pipe(map((users) => ({ users, type: 'search' })));
   }
 }
