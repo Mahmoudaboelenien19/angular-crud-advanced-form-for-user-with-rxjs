@@ -4,9 +4,9 @@
     <input type="text" matInput formControlName="search" placeholder="" />
     <div matSuffix class="w-16 flex justify-center items-center">
       @if (loading$ | async) {
-        <mat-spinner diameter="20"></mat-spinner>
+        <mat-spinner diameter="20" @fadeInOut></mat-spinner>
       } @else {
-        <button type="submit">
+        <button type="submit" @fadeInOut>
           <mat-icon>search</mat-icon>
         </button>
       }

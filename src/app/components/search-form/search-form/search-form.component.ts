@@ -7,6 +7,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { fadeInOut } from '../../../animations/fade-in/fade-in';
 
 @Component({
   selector: 'app-search-form',
@@ -21,6 +22,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     MatProgressSpinnerModule,
   ],
   templateUrl: './search-form.component.html',
+  animations: [fadeInOut],
 })
 export class SearchFormComponent implements OnInit {
   private _userService = inject(UsersService);

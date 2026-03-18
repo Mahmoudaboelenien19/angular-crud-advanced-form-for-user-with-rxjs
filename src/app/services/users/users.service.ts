@@ -25,15 +25,18 @@ type UsersEffect = {
   providedIn: 'root',
 })
 export class UsersService {
-  page = new BehaviorSubject(0);
+  constructor() {}
+  //services
   private http = inject(HttpClient);
   private _ob_handler = inject(GlobalObservablesHandlerService);
+
+  //subjects
   getLoading = new BehaviorSubject(false);
   getLoading$ = this.getLoading.asObservable();
   searchLoading = new BehaviorSubject(false);
   searchLoading$ = this.searchLoading.asObservable();
+  page = new BehaviorSubject(0);
   private search$ = new Subject<string>();
-  constructor() {}
   users$: Observable<User[]> = merge(
     this.getAllUsersWithHandler(),
     this.search$.pipe(concatMap((name) => this.searchUsersWithHandler(name))),

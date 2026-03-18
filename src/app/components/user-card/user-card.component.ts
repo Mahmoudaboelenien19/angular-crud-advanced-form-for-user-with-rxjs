@@ -9,6 +9,8 @@ import { MatChipsModule } from '@angular/material/chips';
 
 import { User } from '../../models/user.model';
 import { CommonModule } from '@angular/common';
+import { listFadeIn } from '../../animations/list-fade/list-fade';
+import { fadeInOut } from '../../animations/fade-in/fade-in';
 @Component({
   selector: 'app-user-card',
   standalone: true,
@@ -22,6 +24,7 @@ import { CommonModule } from '@angular/common';
     MatChipsModule,
     CommonModule,
   ],
+  animations: [fadeInOut],
   templateUrl: './user-card.component.html',
 })
 export class UserCardComponent {
