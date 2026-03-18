@@ -26,6 +26,7 @@
 <ng-container *ngIf="state$ | async as state">
   @if (state.total > 0) {
     <mat-paginator
+      @fadeInOut
       [length]="state.total"
       [pageSize]="5"
       [pageIndex]="state.page"

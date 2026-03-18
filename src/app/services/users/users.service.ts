@@ -61,7 +61,6 @@ export class UsersService {
         }
       }),
     ),
-    // this.search$.pipe(concatMap((name) => this.searchUsersWithHandler(name))),
   ).pipe(
     scan((users, event) => {
       switch (event.type) {
@@ -104,6 +103,7 @@ export class UsersService {
     this.changeState('search', '');
   }
   searchAction(name: string) {
+    this.changeState('page', 0);
     this.changeState('search', name);
     // this.search$.next(name);
   }
