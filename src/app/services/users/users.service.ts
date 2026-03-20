@@ -20,7 +20,8 @@ const Page_Size = 5;
 type EffectMap = {
   getAll: { users: User[] };
   search: { users: User[] };
-  // refresh: { users: User[] };
+  refresh: { users: User[] };
+  edit: { user: User };
 };
 type State = {
   page: number;
@@ -56,18 +57,20 @@ export class UsersService {
     search: '',
   });
   private add$ = new Subject<User>();
+  private edit$ = new Subject<User>();
   users$: Observable<User[]> = merge(
     this.add$.pipe(concatMap((u) => this.addUserWithHandler(u))),
+    this.edit$.pipe(concatMap((u) => this.EditUserWithHandler(u))),
     this.state$.pipe(
       // map((p) => p.page),
       distinctUntilChanged(
         (prev, curr) => prev.page === curr.page && prev.search === curr.search,
       ),
-      switchMap((page) => {
-        if (!page.search) {
-          return this.getAllUsersWithHandler(page.page);
+      switchMap((state) => {
+        if (!state.search) {
+          return this.getAllUsersWithHandler(state.page);
         } else {
-          return this.searchUsersWithHandler(page.search, page.page);
+          return this.searchUsersWithHandler(state.search, state.page);
         }
       }),
     ),
@@ -80,7 +83,8 @@ export class UsersService {
           return event.users;
         case 'refresh':
           return event.users;
-
+        case 'edit':
+          return users.map((u) => (u.id == event.user.id ? event.user : u));
         default:
           return users;
       }
@@ -140,6 +144,7 @@ export class UsersService {
   }
 
   addUserAction(u: User) {
+    this.changeState('search', '');
     this.actionCompleted.next(false);
     this.add$.next(u);
   }
@@ -147,7 +152,7 @@ export class UsersService {
     return this.http.post<User>('http://localhost:3000/users', u);
   }
 
-  addUserWithHandler(u: User) {
+  addUserWithHandler(u: User): Observable<UsersEffect> {
     return this._ob_handler
       .withLoadingAndError(this.addUser(u), this.actionLoading)
       .pipe(
@@ -155,10 +160,33 @@ export class UsersService {
           this.actionCompleted.next(true);
         }),
         concatMap(() =>
-          this.getAllUsers(1).pipe(
-            map((users) => ({ users, type: 'refresh' })),
+          this.getAllUsers(0).pipe(
+            map((users) => {
+              this.changeState('page', 0);
+              return { users, type: 'refresh' } as UsersEffect;
+            }),
           ),
         ),
+      );
+  }
+  EditUserAction(u: User) {
+    console.log(u);
+
+    this.actionCompleted.next(false);
+    this.edit$.next(u);
+  }
+  editUser(u: User) {
+    return this.http.put<User>('http://localhost:3000/users/' + u.id, u);
+  }
+
+  EditUserWithHandler(u: User): Observable<UsersEffect> {
+    return this._ob_handler
+      .withLoadingAndError(this.editUser(u), this.actionLoading)
+      .pipe(
+        tap(() => {
+          this.actionCompleted.next(true);
+        }),
+        map((user) => ({ user, type: 'edit' })),
       );
   }
 }

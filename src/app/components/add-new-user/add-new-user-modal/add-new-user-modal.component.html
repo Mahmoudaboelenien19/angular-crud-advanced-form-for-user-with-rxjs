@@ -1,5 +1,5 @@
 <h4 mat-dialog-title class="flex items-center gap-2">
-  <span>Add New User</span>
+  <span>{{ mode == "add" ? "Add New User" : "Edit User" }}</span>
 </h4>
 
 <mat-dialog-content class="mat-typography">
@@ -151,13 +151,13 @@
   <button
     mat-button
     color="primary"
-    (click)="addUser()"
+    (click)="submitUser()"
     [disabled]="userForm.invalid || (actionLoading$ | async)"
   >
     @if (actionLoading$ | async) {
-      <mat-spinner diameter="12"></mat-spinner>
+      <mat-spinner diameter="16"></mat-spinner>
     } @else {
-      Add User
+      {{ mode === "add" ? "Add User" : "Edit User" }}
     }
   </button>
 </mat-dialog-actions>
