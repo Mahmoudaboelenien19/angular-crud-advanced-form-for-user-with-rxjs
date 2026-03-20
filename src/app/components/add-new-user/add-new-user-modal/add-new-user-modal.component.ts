@@ -57,7 +57,6 @@ interface ExperienceForm {
 })
 export class AddNewUserModalComponent {
   readonly dialog = inject(MatDialog);
-  editableUser: User | undefined;
   openDialog() {
     const dialogRef = this.dialog.open(AddUserDialogComponent);
 
@@ -89,7 +88,7 @@ export class AddNewUserModalComponent {
 export class AddUserDialogComponent implements OnInit {
   private dialogRef = inject(MatDialogRef<AddUserDialogComponent>);
   private data = inject(MAT_DIALOG_DATA) as User | undefined; // the passed user or undefined
-
+  mode: 'edit' | 'add' = 'add';
   private _user_service = inject(UsersService);
   userForm!: FormGroup<UserForm>;
   private destroyRef = inject(DestroyRef);
@@ -128,6 +127,16 @@ export class AddUserDialogComponent implements OnInit {
         }),
       ]),
     });
+    if (this.data) {
+      this.mode = 'edit';
+      this.userForm.patchValue({
+        name: this.data.name,
+        age: this.data.age,
+        email: this.data.email,
+        skills: this.data.skills,
+        experience: this.data.experience,
+      });
+    }
 
     this.userFormControl('age')
       ?.valueChanges.pipe(
@@ -174,19 +183,31 @@ export class AddUserDialogComponent implements OnInit {
   removeExperience(i: number) {
     this.experienceControl().removeAt(i);
   }
-  addUser() {
+  submitUser() {
     if (this.userForm.valid) {
-      const newUser = {
+      const user = {
         ...this.userForm.value,
       } as User;
-      this._user_service.addUserAction(newUser);
-      this.actionCompleted$
-        .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe((bool) => {
-          if (bool) {
-            this.dialogRef.close();
-          }
-        });
+
+      if (this.mode == 'add') {
+        this._user_service.addUserAction(user);
+        this.actionCompleted$
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe((bool) => {
+            if (bool) {
+              this.dialogRef.close();
+            }
+          });
+      } else {
+        this._user_service.EditUserAction({ ...user, id: this.data?.id });
+        this.actionCompleted$
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe((bool) => {
+            if (bool) {
+              this.dialogRef.close();
+            }
+          });
+      }
     }
   }
 }
